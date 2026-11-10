@@ -33,7 +33,7 @@ To change resource details or the admin email, run `npm run configure`; pressing
 
 ## Included behavior
 
-- Premium navy header, original ocean hero, two portal gateways, compact red/green price movement cards, two articles and seven FAQs.
+- A refreshed homepage with two photographic gateways, coastal editorial styling, six Explore destinations, two articles and seven FAQs. The full market price comparison remains available on the prices page.
 - Public seafood market, nearby reviewed sellers, product preparation/weight options, one-seller basket and cash-on-pickup/delivery orders.
 - Member registration with name, email, username and application password. Fisherman accounts open their profile after registration.
 - Fisherman listings, photo upload, orders, earnings/expense records, weather/advisory views, services, stations and explicit emergency calling/location sharing.
@@ -42,7 +42,7 @@ To change resource details or the admin email, run `npm run configure`; pressing
 
 ## Price data
 
-The fish section of the supplied CBSL Daily Price Report, dated 15 October 2026, is transcribed into 21 market/species records for Peliyagoda, Negombo and Narahenpita. Missing observations remain `null` and display “Not reported”; they are never zero. Prices are reference data, not seller quotations or Sainthamaruthu prices. Green means decreased; red means increased. The homepage shows four selected retail observations; See more opens the comparison page.
+The fish section of the supplied CBSL Daily Price Report, dated 15 October 2026, is transcribed into 21 market/species records for Peliyagoda, Negombo and Narahenpita. Missing observations remain `null` and display “Not reported”; they are never zero. Prices are reference data, not seller quotations or Sainthamaruthu prices. Green means decreased; red means increased. The prices page shows the comparison.
 
 The report PDF is included at public/reports/cbsl-price-report-2026-10-15.pdf. The CBSL index returned an access block during this update, so the attachment is the dated data source. There is no automatic daily data feed. Add newer reviewed reports through the admin Market prices section and retain source/date information.
 
