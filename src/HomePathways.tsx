@@ -10,8 +10,8 @@ const pathways = [
     to: "/explore",
     action: "Start exploring",
     icon: Store,
-    // ATEEQ- PHOTOS: https://www.pexels.com/photo/33557497/
-    image: "pathway-fresh-catch",
+    image: "pathway-fish-market",
+    imageHeight: 1308,
   },
   {
     theme: "fishermen",
@@ -21,8 +21,8 @@ const pathways = [
     to: "/portal",
     action: "Open your portal",
     icon: Anchor,
-    // Sohan Rahat: https://www.pexels.com/photo/27000784/
-    image: "pathway-fishing-nets",
+    image: "pathway-fishermen-at-sea",
+    imageHeight: 920,
   },
 ];
 
@@ -37,15 +37,15 @@ export default function HomePathways({
         Find your place by the water.
       </h2>
       <div className="pathways-grid">
-        {pathways.map(({ theme, title, description, features, to, action, icon: Icon, image }) => (
+        {pathways.map(({ theme, title, description, features, to, action, icon: Icon, image, imageHeight }) => (
           <article className={`pathway-card pathway-card--${theme}`} key={theme}>
             <div className="pathway-visual" aria-hidden="true">
               <img
                 src={`/images/${image}.webp`}
-                srcSet={`/images/${image}-720.webp 720w, /images/${image}.webp 1200w`}
+                srcSet={`/images/${image}-480.webp 480w, /images/${image}.webp 736w`}
                 sizes="(max-width: 560px) 100vw, (max-width: 820px) 64vw, 32vw"
-                width={1200}
-                height={800}
+                width={736}
+                height={imageHeight}
                 alt=""
                 loading="lazy"
                 decoding="async"

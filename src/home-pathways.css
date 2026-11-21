@@ -30,6 +30,8 @@
   --pathway-icon: #ffffff8c;
   --pathway-focus: #1b6470;
   --pathway-radius: clamp(20px, 1.6vw, 26px);
+  --pathway-photo-position: center 64%;
+  --pathway-mobile-photo-position: center 59%;
 
   position: relative;
   isolation: isolate;
@@ -52,6 +54,8 @@
   --pathway-badge: #143b5c;
   --pathway-icon: #a5d6f21a;
   --pathway-focus: #93e6f5;
+  --pathway-photo-position: center 50%;
+  --pathway-mobile-photo-position: center 48%;
 }
 
 .pathway-visual {
@@ -67,11 +71,7 @@
   inline-size: 100%;
   block-size: 100%;
   object-fit: cover;
-  object-position: 63% center;
-}
-
-.pathway-card--fishermen .pathway-visual img {
-  object-position: 88% center;
+  object-position: var(--pathway-photo-position);
 }
 
 .pathway-visual::after {
@@ -192,11 +192,7 @@
   }
 
   .pathway-visual img {
-    object-position: center 55%;
-  }
-
-  .pathway-card--fishermen .pathway-visual img {
-    object-position: center 42%;
+    object-position: var(--pathway-mobile-photo-position);
   }
 
   .pathway-visual::after {
