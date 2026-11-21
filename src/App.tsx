@@ -1120,7 +1120,7 @@ export default function App() {
                   try {
                     if (navigator.share) {
                       await navigator.share({
-                        title: "My location — Blunet",
+                        title: "My location — Bluenet",
                         text,
                       });
                       setToast(
@@ -1952,7 +1952,7 @@ export default function App() {
     return (
       <section className="gateway-section">
         <div className="section-heading">
-          <div><p className="eyebrow">BLUNET</p><h2>What brings you here?</h2></div>
+          <div><p className="eyebrow">BLUENET</p><h2>What brings you here?</h2></div>
           <p className="gateway-intro">A marketplace for seafood.<br />A workspace for fishermen.</p>
         </div>
         <div className="gateway-grid">
@@ -2001,7 +2001,7 @@ export default function App() {
                 <span>{r.data.category}</span>
               </div>
               <div className="story-copy">
-                <small>Blunet journal · 2 min read</small>
+                <small>Bluenet journal · 2 min read</small>
                 <h3>{r.data.title}</h3>
                 <p>{r.data.excerpt}</p>
                 <span className="text-link">
@@ -2024,7 +2024,7 @@ export default function App() {
           <p className="eyebrow">HELP & SUPPORT</p>
           <h2>Your questions, answered.</h2>
           <p>
-            Buying, selling and using Blunet.
+            Buying, selling and using Bluenet.
           </p>
           <button
             className="text-link"
@@ -2115,7 +2115,7 @@ export default function App() {
             "Explore the coast.",
             "Seafood, local sellers and useful information for your next trip.",
             undefined,
-            "EXPLORE BLUNET",
+            "EXPLORE BLUENET",
           )}
           <div className="explore-tools">
             {[
@@ -2875,7 +2875,7 @@ export default function App() {
         <>
           {title(
             "A closer connection to our coast.",
-            "Blunet brings local fishermen and seafood shoppers together.",
+            "Bluenet brings local fishermen and seafood shoppers together.",
           )}
           <div className="prose">
             <h2>One coast. One community.</h2>
@@ -3643,7 +3643,7 @@ export default function App() {
       <header className="header">
         <A to="/" className="brand">
           <Waves size={40} strokeWidth={1.6} />
-          <span>Blunet</span>
+          <span>Bluenet</span>
         </A>
         <nav className="desktop-nav">{nav}</nav>
         <div className="header-actions">
@@ -3807,7 +3807,7 @@ export default function App() {
             <div>
               <A className="brand" to="/">
                 <Waves size={30} />
-                <span>Blunet</span>
+                <span>Bluenet</span>
               </A>
               <p>
                 A closer connection to our coast.
@@ -3830,7 +3830,7 @@ export default function App() {
               <A to="/sos">{t("Emergency assistance")}</A>
             </div>
             <div>
-              <h4>Blunet</h4>
+              <h4>Bluenet</h4>
               <A to="/about">About our community</A>
               <A to="/faq">FAQs</A>
               <A to="/admin">Admin login</A>
@@ -3851,7 +3851,7 @@ export default function App() {
           </div>
           <div className="footer-bottom">
             <span>
-              © {new Date().getFullYear()} Blunet · Sri Lanka
+              © {new Date().getFullYear()} Bluenet · Sri Lanka
             </span>
             <div>
               <A to="/privacy">Privacy</A>
@@ -3894,7 +3894,7 @@ export default function App() {
             className="modal"
             role="dialog"
             aria-modal="true"
-            aria-label="Blunet dialog"
+            aria-label="Bluenet dialog"
             onKeyDown={(e) => {
               if (e.key === "Tab") {
                 const nodes = e.currentTarget.querySelectorAll<HTMLElement>(

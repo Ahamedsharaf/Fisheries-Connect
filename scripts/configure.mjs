@@ -19,7 +19,7 @@ try {
     return v;
   };
   console.log(
-    "Blunet · Cloudflare setup. This updates configuration, not secrets.",
+    "Bluenet · Cloudflare setup. This updates configuration, not secrets.",
   );
   const name = await ask(
     "Worker name (lowercase letters, numbers and hyphens)",
