@@ -33,10 +33,9 @@ export default function HomePathways({
 }) {
   return (
     <section className="home-pathways" aria-labelledby="home-pathways-heading">
-      <div className="pathways-heading">
-        <h2 id="home-pathways-heading">Find your place by the water.</h2>
-        <p>Browse without an account. Sign in to sell your catch.</p>
-      </div>
+      <h2 className="pathways-heading" id="home-pathways-heading">
+        Find your place by the water.
+      </h2>
       <div className="pathways-grid">
         {pathways.map(({ theme, title, description, features, to, action, icon: Icon, image }) => (
           <article className={`pathway-card pathway-card--${theme}`} key={theme}>
@@ -53,7 +52,7 @@ export default function HomePathways({
               />
             </div>
             <div className="pathway-copy">
-              <span className="pathway-icon"><Icon size={28} strokeWidth={1.8} aria-hidden="true" /></span>
+              <span className="pathway-icon"><Icon size={24} strokeWidth={1.8} aria-hidden="true" /></span>
               <h3>{title}</h3>
               <p>{description}</p>
               <ul className="pathway-features" aria-label={`${title} features`}>

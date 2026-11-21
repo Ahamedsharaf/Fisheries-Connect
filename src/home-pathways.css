@@ -1,31 +1,17 @@
 .home-pathways {
-  padding: clamp(48px, 5vw, 86px) 3.5%;
+  max-inline-size: 1320px;
+  margin-inline: auto;
+  padding: clamp(40px, 4vw, 64px) 3.5%;
   color: #102e4c;
 }
 
 .pathways-heading {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 18px 44px;
-  margin-block-end: clamp(26px, 3vw, 46px);
-}
-
-.pathways-heading h2 {
-  margin: 0;
-  font-size: clamp(30px, 3vw, 46px);
+  margin: 0 0 clamp(22px, 2.2vw, 32px);
+  font-size: clamp(27px, 2.5vw, 36px);
   font-weight: 600;
   letter-spacing: -0.045em;
-  line-height: 1.1;
+  line-height: 1.15;
   text-wrap: balance;
-}
-
-.pathways-heading p {
-  flex: 0 1 26ch;
-  margin: 0;
-  color: #4e667b;
-  font-size: clamp(14px, 1.12vw, 17px);
-  line-height: 1.55;
 }
 
 .pathways-grid {
@@ -49,9 +35,9 @@
   isolation: isolate;
   display: flex;
   flex-direction: column;
-  min-block-size: clamp(344px, 26vw, 438px);
+  min-block-size: clamp(330px, 24vw, 378px);
   overflow: hidden;
-  padding: clamp(25px, 2.4vw, 44px);
+  padding: clamp(24px, 2.2vw, 35px);
   border-radius: var(--pathway-radius);
   background: rgb(var(--pathway-surface));
   color: var(--pathway-ink);
@@ -99,10 +85,10 @@
 
 .pathway-icon {
   display: grid;
-  inline-size: clamp(50px, 4vw, 63px);
+  inline-size: clamp(46px, 3.5vw, 54px);
   aspect-ratio: 1;
   place-items: center;
-  margin-block-end: clamp(20px, 2.4vw, 32px);
+  margin-block-end: clamp(17px, 1.7vw, 24px);
   border: 1px solid var(--pathway-line);
   border-radius: 17px;
   background: var(--pathway-icon);
@@ -111,7 +97,7 @@
 
 .pathway-copy h3 {
   margin: 0 0 12px;
-  font-size: clamp(30px, 2.65vw, 43px);
+  font-size: clamp(27px, 2.25vw, 34px);
   font-weight: 600;
   letter-spacing: -0.04em;
   line-height: 1.06;
@@ -121,7 +107,7 @@
   max-inline-size: min(38ch, 65%);
   margin: 0;
   color: var(--pathway-subtle);
-  font-size: clamp(14px, 1.18vw, 17px);
+  font-size: clamp(14px, 1.05vw, 15px);
   line-height: 1.56;
 }
 
@@ -154,7 +140,7 @@
   padding-block-start: clamp(15px, 1.6vw, 22px);
   border-block-start: 1px solid var(--pathway-line);
   color: var(--pathway-ink);
-  font-size: clamp(14px, 1.12vw, 17px);
+  font-size: clamp(14px, 1.05vw, 15px);
   font-weight: 650;
   text-decoration: none;
 }
@@ -196,15 +182,6 @@
 }
 
 @media (max-width: 560px) {
-  .pathways-heading {
-    display: block;
-  }
-
-  .pathways-heading p {
-    max-inline-size: 30ch;
-    margin-block-start: 11px;
-  }
-
   .pathway-card {
     padding-block-start: clamp(127px, 39vw, 198px);
   }
