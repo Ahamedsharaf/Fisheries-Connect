@@ -46,6 +46,7 @@ import {
 } from "../lib/domain";
 import { i18n } from "../lib/i18n";
 import AuthForm from "./AuthForm";
+import HomePathways from "./HomePathways";
 import MarketPrices from "./MarketPrices";
 // Also support local HTTP previews, where randomUUID is unavailable.
 function requestId() {
@@ -1948,26 +1949,6 @@ export default function App() {
       </>
     );
   }
-  function gateway() {
-    return (
-      <section className="gateway-section">
-        <div className="section-heading">
-          <div><p className="eyebrow">BLUENET</p><h2>What brings you here?</h2></div>
-          <p className="gateway-intro">A marketplace for seafood.<br />A workspace for fishermen.</p>
-        </div>
-        <div className="gateway-grid">
-          <A to="/explore" className="gateway-card explore-gateway">
-            <img className="gateway-photo" src="/images/prawns.png" alt="Fresh prawns on ice" loading="lazy" />
-            <div className="gateway-copy"><span className="gateway-kicker">BUY & DISCOVER</span><h3>Explore</h3><p>Browse seafood, find local sellers and plan your next purchase.</p><span className="gateway-action">Explore the market <ArrowUpRight size={23} /></span></div>
-          </A>
-          <A to="/portal" className="gateway-card fishermen-gateway">
-            <img className="gateway-photo" src="/images/coastal-fishing.png" alt="Illustrative scene of fishermen tending nets beside a boat" loading="lazy" />
-            <div className="gateway-copy"><span className="gateway-kicker">SELL & MANAGE</span><h3>For fishermen</h3><p>List your catch, manage orders and check conditions before heading out.</p><span className="gateway-action">{me ? "Open your portal" : "Sign in to your portal"} <ArrowUpRight size={23} /></span></div>
-          </A>
-        </div>
-      </section>
-    );
-  }
   function stories() {
     const articles = entries("article");
     return (
@@ -2193,7 +2174,7 @@ export default function App() {
               Sri Lanka
             </span>
           </section>
-          {gateway()}
+          <HomePathways Link={A} />
           {stories()}
           {faq()}
         </>
