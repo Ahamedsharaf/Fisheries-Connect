@@ -34,7 +34,7 @@ export default {
         response = new Response("Method not allowed", { status: 405 });
       else response = await env.ASSETS.fetch(req);
     } catch {
-      console.error("Fisheries request failed", { path: p });
+      console.error("Blunet request failed", { path: p });
       response = Response.json(
         { error: "The service is temporarily unavailable. Please retry." },
         { status: 503, headers: { "Cache-Control": "no-store" } },

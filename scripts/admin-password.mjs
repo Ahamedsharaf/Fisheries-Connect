@@ -46,7 +46,7 @@ try {
   if (!config.vars?.ADMIN_EMAIL || config.vars.ADMIN_EMAIL.includes("REPLACE"))
     throw Error("Run npm run configure first.");
   console.log(
-    "Set the Fisheries Connect admin password for " +
+    "Set the Blunet admin password for " +
       config.vars.ADMIN_EMAIL +
       ".",
   );

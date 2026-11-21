@@ -5,7 +5,7 @@ This application uses Workers with Static Assets, D1 and R2. A static Pages-only
 ## Existing deployment
 
 1. Keep your old project folder as a backup and extract v2 into a new folder.
-2. Review wrangler.jsonc. It contains the existing Worker `fisheries-connect`, your D1 ID, R2 bucket, actual URL and selected admin email from the supplied screenshots. There are no secrets in this file.
+2. Review wrangler.jsonc. It targets the `blunet` Worker and the existing D1 database and R2 bucket. The public config has placeholders for the D1 ID and admin email. Run `npm run configure` to set those values locally before deploying.
 3. Open PowerShell/Windows Terminal in the new project folder. Install Node 22.13+ if needed.
 
 ```bash

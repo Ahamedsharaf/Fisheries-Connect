@@ -16,7 +16,7 @@ if (origin.protocol !== "https:")
   throw Error("APP_URL must use HTTPS in production");
 if (
   origin.hostname.includes("your-subdomain") ||
-  origin.hostname === "fisheries-connect.workers.dev"
+  origin.hostname === `${c.name}.workers.dev`
 )
   throw Error("Use your actual Worker account subdomain in APP_URL.");
 if (

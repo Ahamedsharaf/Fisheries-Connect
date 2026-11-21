@@ -74,7 +74,7 @@ export default function AuthForm({
         </span>
         <p className="eyebrow">
           {admin
-            ? "FISHERIES CONNECT · ADMINISTRATION"
+            ? "BLUNET · ADMINISTRATION"
             : "YOUR WORK. YOUR COAST."}
         </p>
         <h1>
@@ -99,7 +99,7 @@ export default function AuthForm({
         </p>
         <div className="auth-story-foot">
           <span className="status-dot" />
-          Fisheries Connect · Sri Lanka
+          Blunet · Sri Lanka
         </div>
       </div>
       <div className="auth-card">
@@ -130,7 +130,7 @@ export default function AuthForm({
             {admin
               ? "Enter your admin email and application password."
               : reset
-                ? "Choose a new password for your Fisheries Connect account."
+                ? "Choose a new password for your Blunet account."
                 : register
                   ? "A few details, and you’re ready to get started."
                   : "Use your email or username to continue."}
@@ -310,7 +310,7 @@ export default function AuthForm({
           )}
           <p className="auth-note small">
             <LockKeyhole size={13} />
-            Use a separate Fisheries Connect password.
+            Use a separate Blunet password.
           </p>
         </form>
       </div>

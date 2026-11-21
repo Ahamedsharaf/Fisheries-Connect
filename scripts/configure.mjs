@@ -19,7 +19,7 @@ try {
     return v;
   };
   console.log(
-    "Fisheries Connect · Cloudflare setup. This updates configuration, not secrets.",
+    "Blunet · Cloudflare setup. This updates configuration, not secrets.",
   );
   const name = await ask(
     "Worker name (lowercase letters, numbers and hyphens)",
@@ -63,7 +63,7 @@ try {
   if (origin.protocol !== "https:") throw Error("Public URL must use HTTPS");
   if (
     origin.hostname.includes("your-subdomain") ||
-    origin.hostname === "fisheries-connect.workers.dev"
+    origin.hostname === `${name}.workers.dev`
   )
     throw Error("Use the real Worker URL, including your account subdomain.");
   config.vars ||= {};

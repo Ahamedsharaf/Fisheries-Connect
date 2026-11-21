@@ -1,6 +1,6 @@
-# Fisheries Connect · Coastal edition 2.0
+# Blunet · Coastal edition 2.0
 
-The Cloudflare edition of Fisheries Connect, with an Explore gateway, a fishermen portal, a separate super admin login, dated CBSL fish-price comparisons, two coastal articles and an editable FAQ section. Authentication uses an application email/username and password. There is no Google sign-in or OAuth configuration.
+The Cloudflare edition of Blunet, with an Explore gateway, a fishermen portal, a separate super admin login, dated CBSL fish-price comparisons, two coastal articles and an editable FAQ section. Authentication uses an application email/username and password. There is no Google sign-in or OAuth configuration.
 
 ## Update your existing Cloudflare deployment
 
@@ -22,7 +22,7 @@ Run `npm run admin:password` only when setting or rotating the admin password. I
 
 Open:
 
-- Website: https://fisheries-connect.ahamedsaraf18.workers.dev
+- Website: https://blunet.ahamedsaraf18.workers.dev
 - Explore: /explore
 - Fishermen login/create account: /portal
 - Super admin email/password login: /admin
