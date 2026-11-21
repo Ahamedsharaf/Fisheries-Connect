@@ -36,6 +36,7 @@ import {
   FileText,
   Loader2,
   Users,
+  LogOut,
 } from "lucide-react";
 import {
   districts,
@@ -47,6 +48,8 @@ import {
 import { i18n } from "../lib/i18n";
 import AuthForm from "./AuthForm";
 import MarketPrices from "./MarketPrices";
+import Landing from "./Landing";
+import { Navigate, SiteLink as A } from "./SiteLink";
 // Also support local HTTP previews, where randomUUID is unavailable.
 function requestId() {
   if (typeof crypto.randomUUID === "function") return crypto.randomUUID();
@@ -128,7 +131,7 @@ export default function App() {
       records: [],
       audit: [],
     });
-  const [path, setPath] = useState("/"),
+  const [path, setPath] = useState(() => window.location.pathname),
     [lang, setLang] = useState("en"),
     [cart, setCart] = useState<Cart>([]),
     [loading, setLoading] = useState(true),
@@ -153,11 +156,13 @@ export default function App() {
     [gps, setGps] = useState<R | null>(null),
     [online, setOnline] = useState(true),
     [period, setPeriod] = useState("All time"),
-    [statusFilter, setStatusFilter] = useState("All");
+    [statusFilter, setStatusFilter] = useState("All"),
+    [openedWorkspace, setOpenedWorkspace] = useState<{ key: string; error?: string } | null>(null);
   const t = (s: string) => i18n[lang]?.[s] || s,
     me = data.me,
     isPortal = path.startsWith("/portal"),
     isAdmin = path === "/admin" || path.startsWith("/admin/");
+  const workspaceKey = me ? (isAdmin && me.isAdmin ? "admin:" : "member:") + me.id : "";
   async function read(kind = "bootstrap") {
     const r = await fetch("/api/app?kind=" + kind),
       d: R = await r.json();
@@ -212,10 +217,23 @@ export default function App() {
       window.removeEventListener("offline", on);
     };
   }, []);
+  async function openWorkspace() {
+    try {
+      await read(isAdmin ? "admin" : "workspace");
+      setOpenedWorkspace({ key: workspaceKey });
+    } catch (e) {
+      setOpenedWorkspace({
+        key: workspaceKey,
+        error: e instanceof Error ? e.message : "Unable to load this workspace.",
+      });
+    }
+  }
   useEffect(() => {
-    if (me && (isPortal || path === "/orders" || path === "/account"))
+    if ((isPortal && me) || (isAdmin && me?.isAdmin)) {
+      void openWorkspace();
+    } else if (me && (path === "/orders" || path === "/account")) {
       read("workspace").catch((e) => setToast(e.message));
-    if (me?.isAdmin && isAdmin) read("admin").catch((e) => setToast(e.message));
+    }
   }, [path, me?.id]);
   useEffect(() => {
     document.documentElement.lang = lang;
@@ -275,7 +293,7 @@ export default function App() {
     setQty(1);
     setPrep("Whole");
     setSearch("");
-    window.scrollTo(0, 0);
+    window.scrollTo({ top: 0, behavior: "instant" });
   }
   async function authSuccess(p: string) {
     await read();
@@ -289,6 +307,7 @@ export default function App() {
     });
     if (r.ok) {
       setCart([]);
+      setOpenedWorkspace(null);
       await read();
       go("/");
     } else setToast("Unable to sign out. Please retry.");
@@ -311,30 +330,6 @@ export default function App() {
     } finally {
       setBusy(false);
     }
-  }
-  function A({
-    to,
-    children,
-    className = "",
-  }: {
-    to: string;
-    children: ReactNode;
-    className?: string;
-  }) {
-    return (
-      <a
-        href={to}
-        className={className}
-        onClick={(e) => {
-          if (!e.metaKey && !e.ctrlKey) {
-            e.preventDefault();
-            go(to);
-          }
-        }}
-      >
-        {children}
-      </a>
-    );
   }
   async function act(b: R, message = "Saved successfully") {
     if (busy) return null;
@@ -1120,7 +1115,7 @@ export default function App() {
                   try {
                     if (navigator.share) {
                       await navigator.share({
-                        title: "My location — Fisheries Connect",
+                        title: "My location — Bluenet",
                         text,
                       });
                       setToast(
@@ -1426,27 +1421,6 @@ export default function App() {
           notice(
             "Your seller profile is awaiting review. You can prepare catch listings while the administrator reviews your details.",
           )}
-        <div className="feature-panel">
-          <div>
-            <p className="eyebrow">A WELL-PLANNED DAY AT SEA</p>
-            <h2>
-              Check the waters.
-              <br />
-              Then plan your day.
-            </h2>
-            <p>
-              Review marine conditions and official advisories before leaving
-              harbour.
-            </p>
-            <A className="button secondary" to="/portal/weather">
-              {t("Marine weather")} <ArrowRight size={16} />
-            </A>
-          </div>
-          <img
-            src="/images/ocean-hero.png"
-            alt="Fishing boat on coastal waters"
-          />
-        </div>
         <div className="stats">
           <div>
             <span>Active catches</span>
@@ -1474,31 +1448,56 @@ export default function App() {
             </A>
           </div>
         </div>
-        <div className="section-heading">
-          <h2>Your latest catches</h2>
-          <A to="/portal/catches" className="text-link">
-            View all <ArrowRight size={16} />
-          </A>
-        </div>
-        {work.listings.length ? (
-          work.listings.slice(0, 3).map((p: R) => (
-            <div className="mini-product" key={p.id}>
-              <img src={p.image} alt={p.name} />
-              <div>
-                <h3>{p.name}</h3>
-                <p>
-                  {p.stock / 1000} kg · {money(p.price)}/kg
-                </p>
-              </div>
-              <Badge>{p.status}</Badge>
+        <div className="workspace-overview">
+          <section className="workspace-card">
+            <div className="section-heading">
+              <h2>Your latest catches</h2>
+              <A to="/portal/catches" className="text-link">
+                View all <ArrowRight size={16} />
+              </A>
             </div>
-          ))
-        ) : (
-          <Empty
-            title="No catches listed yet"
-            text="Your next connection starts with your first listing."
-          />
-        )}
+            {work.listings.length ? (
+              work.listings.slice(0, 3).map((p: R) => (
+                <div className="mini-product" key={p.id}>
+                  <img src={p.image} alt={p.name} />
+                  <div>
+                    <h3>{p.name}</h3>
+                    <p>
+                      {p.stock / 1000} kg · {money(p.price)}/kg
+                    </p>
+                  </div>
+                  <Badge>{p.status}</Badge>
+                </div>
+              ))
+            ) : (
+              <Empty
+                title="No catches listed yet"
+                text="Your next connection starts with your first listing."
+              />
+            )}
+          </section>
+          <div className="feature-panel">
+            <div>
+              <p className="eyebrow">A WELL-PLANNED DAY AT SEA</p>
+              <h2>
+                Check the waters.
+                <br />
+                Then plan your day.
+              </h2>
+              <p>
+                Review marine conditions and official advisories before leaving
+                harbour.
+              </p>
+              <A className="button secondary" to="/portal/weather">
+                {t("Marine weather")} <ArrowRight size={16} />
+              </A>
+            </div>
+            <img
+              src="/images/bluenet-ocean.webp"
+              alt="Fishing boat on coastal waters"
+            />
+          </div>
+        </div>
       </>
     );
   }
@@ -1551,52 +1550,59 @@ export default function App() {
                 <strong>{admin.orders.length}</strong>
               </div>
             </div>
-            <h2>Launch setup</h2>
-            {[
-              [true, "Email/password accounts and persistent storage"],
-              [
-                admin.profiles.some(
-                  (p: R) =>
-                    p.role === "fisherman" && p.verification === "verified",
-                ),
-                "Verified fishermen",
-              ],
-              [
-                admin.listings.some((p: R) => p.status === "active"),
-                "Approved catch listings",
-              ],
-              [
-                admin.weatherConfigured,
-                "Commercial marine forecast connection",
-              ],
-              [
-                admin.records.some((r: R) => r.type === "price"),
-                "Official price reports",
-              ],
-              [
-                admin.records.some((r: R) => r.type === "station"),
-                "Reviewed fishing station directory",
-              ],
-            ].map(([ok, label]) => (
-              <div className="list-row" key={String(label)}>
-                <span>{label}</span>
-                <Badge tone={ok ? "green" : "amber"}>
-                  {ok ? "Configured" : "Needs setup"}
-                </Badge>
-              </div>
-            ))}
-            <p className="small section">
-              The weather connection requires a commercial Open-Meteo key in the
-              server setting WEATHER_API_KEY. Official data needs ongoing
-              operator review.
-            </p>
-            <h2 className="section">Recent admin activity</h2>
-            {admin.audit.map((a: R) => (
-              <div className="list-row" key={a.id}>
-                <span>{a.action}</span>
-                <small>{new Date(a.created).toLocaleString()}</small>
-              </div>
-            ))}
+            <div className="workspace-overview">
+              <section className="workspace-card">
+                <h2>Launch setup</h2>
+                {[
+                  [true, "Email/password accounts and persistent storage"],
+                  [
+                    admin.profiles.some(
+                      (p: R) =>
+                        p.role === "fisherman" && p.verification === "verified",
+                    ),
+                    "Verified fishermen",
+                  ],
+                  [
+                    admin.listings.some((p: R) => p.status === "active"),
+                    "Approved catch listings",
+                  ],
+                  [
+                    admin.weatherConfigured,
+                    "Commercial marine forecast connection",
+                  ],
+                  [
+                    admin.records.some((r: R) => r.type === "price"),
+                    "Official price reports",
+                  ],
+                  [
+                    admin.records.some((r: R) => r.type === "station"),
+                    "Reviewed fishing station directory",
+                  ],
+                ].map(([ok, label]) => (
+                  <div className="list-row" key={String(label)}>
+                    <span>{label}</span>
+                    <Badge tone={ok ? "green" : "amber"}>
+                      {ok ? "Configured" : "Needs setup"}
+                    </Badge>
+                  </div>
+                ))}
+                <p className="small section">
+                  The weather connection requires a commercial Open-Meteo key in the
+                  server setting WEATHER_API_KEY. Official data needs ongoing
+                  operator review.
+                </p>
+              </section>
+              <section className="workspace-card">
+                <h2>Recent admin activity</h2>
+                {!admin.audit.length && <p className="small">No activity recorded yet.</p>}
+                {admin.audit.map((a: R) => (
+                  <div className="list-row" key={a.id}>
+                    <span>{a.action}</span>
+                    <small>{new Date(a.created).toLocaleString()}</small>
+                  </div>
+                ))}
+              </section>
+            </div>
           </>
         ) : tab === "Users & verification" ? (
           <div className="table-wrap">
@@ -1948,26 +1954,6 @@ export default function App() {
       </>
     );
   }
-  function gateway() {
-    return (
-      <section className="gateway-section">
-        <div className="section-heading">
-          <div><p className="eyebrow">FISHERIES CONNECT</p><h2>What brings you here?</h2></div>
-          <p className="gateway-intro">A marketplace for seafood.<br />A workspace for fishermen.</p>
-        </div>
-        <div className="gateway-grid">
-          <A to="/explore" className="gateway-card explore-gateway">
-            <img className="gateway-photo" src="/images/prawns.png" alt="Fresh prawns on ice" loading="lazy" />
-            <div className="gateway-copy"><span className="gateway-kicker">BUY & DISCOVER</span><h3>Explore</h3><p>Browse seafood, find local sellers and plan your next purchase.</p><span className="gateway-action">Explore the market <ArrowUpRight size={23} /></span></div>
-          </A>
-          <A to="/portal" className="gateway-card fishermen-gateway">
-            <img className="gateway-photo" src="/images/coastal-fishing.png" alt="Illustrative scene of fishermen tending nets beside a boat" loading="lazy" />
-            <div className="gateway-copy"><span className="gateway-kicker">SELL & MANAGE</span><h3>For fishermen</h3><p>List your catch, manage orders and check conditions before heading out.</p><span className="gateway-action">{me ? "Open your portal" : "Sign in to your portal"} <ArrowUpRight size={23} /></span></div>
-          </A>
-        </div>
-      </section>
-    );
-  }
   function stories() {
     const articles = entries("article");
     return (
@@ -2001,7 +1987,7 @@ export default function App() {
                 <span>{r.data.category}</span>
               </div>
               <div className="story-copy">
-                <small>Fisheries Connect journal · 2 min read</small>
+                <small>Bluenet journal</small>
                 <h3>{r.data.title}</h3>
                 <p>{r.data.excerpt}</p>
                 <span className="text-link">
@@ -2024,7 +2010,7 @@ export default function App() {
           <p className="eyebrow">HELP & SUPPORT</p>
           <h2>Your questions, answered.</h2>
           <p>
-            Buying, selling and using Fisheries Connect.
+            Buying, selling and using Bluenet.
           </p>
           <button
             className="text-link"
@@ -2034,13 +2020,14 @@ export default function App() {
           </button>
         </div>
         <div className="faq-list">
+          {!list.length && !loading && <p className="muted">Have a question? Send us a message.</p>}
           {list.map((r: R) => (
             <details key={r.id}>
               <summary>
                 {r.data.question}
                 <Plus size={18} />
               </summary>
-              <p>{r.data.answer}</p>
+              <p>{r.id === "faq-3" ? r.data.answer.replaceAll("Fisheries Connect", "Bluenet") : r.data.answer}</p>
             </details>
           ))}
         </div>
@@ -2086,7 +2073,9 @@ export default function App() {
             alt="Illustrative seafood and coastal imagery"
           />
           <div className="prose">
-            {r.data.body.split(/\n\s*\n/).map((p: string, i: number) => (
+            {(r.id === "article-sainthamaruthu" || r.id === "article-seafood"
+              ? r.data.body.replaceAll("Fisheries Connect", "Bluenet")
+              : r.data.body).split(/\n\s*\n/).map((p: string, i: number) => (
               <p key={i}>{p}</p>
             ))}
             {r.data.source && (
@@ -2115,7 +2104,7 @@ export default function App() {
             "Explore the coast.",
             "Seafood, local sellers and useful information for your next trip.",
             undefined,
-            "EXPLORE FISHERIES CONNECT",
+            "EXPLORE BLUENET",
           )}
           <div className="explore-tools">
             {[
@@ -2136,6 +2125,7 @@ export default function App() {
                 "Nearby sellers",
                 "Get to know the people behind the catch.",
                 Users,
+  LogOut,
               ],
               [
                 "/weather",
@@ -2168,35 +2158,15 @@ export default function App() {
       );
     if (path === "/")
       return (
-        <>
-          <section className="hero">
-            <img
-              className="hero-image"
-              src="/images/ocean-hero.png"
-              alt="Fishing boat in turquoise coastal water"
-              fetchPriority="high"
-            />
-            <div className="hero-content">
-              <p className="eyebrow">SRI LANKA’S SEAFOOD COMMUNITY</p>
-              <h1>
-                {t("Fresh seafood.")}
-                <br />
-                {t("A closer connection.")}
-              </h1>
-              <p>{t("Discover the daily catch from local fishermen.")}</p>
-              <A className="button white" to="/explore">
-                Explore the coast <ArrowRight size={19} />
-              </A>
-            </div>
-            <span className="hero-location">
-              <MapPin size={14} />
-              Sri Lanka
-            </span>
-          </section>
-          {gateway()}
-          {stories()}
-          {faq()}
-        </>
+        <Landing
+          translate={t}
+          signedIn={Boolean(me)}
+          prices={entries("price").length > 0 && (
+            <MarketPrices compact rows={entries("price")} onNavigate={go} />
+          )}
+          stories={entries("article").length > 0 && stories()}
+          help={faq()}
+        />
       );
     if (path === "/market") {
       const list = catalogue
@@ -2875,7 +2845,7 @@ export default function App() {
         <>
           {title(
             "A closer connection to our coast.",
-            "Fisheries Connect brings local fishermen and seafood shoppers together.",
+            "Bluenet brings local fishermen and seafood shoppers together.",
           )}
           <div className="prose">
             <h2>One coast. One community.</h2>
@@ -3620,309 +3590,341 @@ export default function App() {
       );
     return null;
   }
-  const nav = (
-      <>
-        <A to="/explore">Explore</A>
-        <A to="/portal">For fishermen</A>
-        <A to="/articles">Our coast</A>
-      </>
-    ),
-    portalLinks: [string, string, any][] = [
-      ["/portal", "Overview", LayoutDashboard],
-      ["/portal/weather", "Marine weather", CloudSun],
-      ["/portal/catches", "My catches", Fish],
-      ["/portal/orders", "Orders", Package],
-      ["/portal/prices", "Market prices", FileText],
-      ["/portal/earnings", "Earnings", Wallet],
-      ["/portal/services", "Equipment & services", Settings],
-      ["/portal/stations", "Fishing stations", Anchor],
+  const inWorkspace = Boolean((isPortal && me) || (isAdmin && me?.isAdmin));
+  const publicLinks = [
+    ["/explore", "Explore"],
+    ["/market", "Seafood market"],
+    ["/portal", "For fishermen"],
+    ["/articles", "Our coast"],
+  ];
+  const navigationGroups = isAdmin
+    ? [
+        { name: "Workspace", items: [
+          ["Overview", LayoutDashboard], ["Users & verification", Users],
+          ["Products", Fish], ["Orders", Package], ["Complaints", LifeBuoy],
+        ] as const },
+        { name: "Public content", items: [
+          ["Market prices", Wallet], ["Official alerts", AlertTriangle],
+          ["Fishing stations", Anchor], ["Services", Settings],
+          ["Articles", FileText], ["FAQs", FileText],
+        ] as const },
+      ]
+    : [];
+  const portalGroups = [
+    { name: "Workspace", items: [
+      ["/portal", "Overview", LayoutDashboard], ["/portal/catches", "My catches", Fish],
+      ["/portal/orders", "Orders", Package], ["/portal/earnings", "Earnings", Wallet],
       ["/portal/profile", "My profile", User],
-    ];
+    ] as const },
+    { name: "Coastal resources", items: [
+      ["/portal/weather", "Marine weather", CloudSun], ["/portal/prices", "Market prices", FileText],
+      ["/portal/stations", "Fishing stations", Anchor], ["/portal/services", "Equipment & services", Settings],
+    ] as const },
+  ];
+  const nav = publicLinks.map(([url, label]) => (
+    <A key={url} to={url} current={path === url}>{t(label)}</A>
+  ));
+  const language = (
+    <select className="language" aria-label="Language" value={lang} onChange={(e) => setLang(e.target.value)}>
+      <option value="en">English</option>
+      <option value="ta">தமிழ்</option>
+      <option value="si">සිංහල</option>
+    </select>
+  );
+  const brand = (
+    <A to="/" className="brand">
+      <img src="/bluenet.svg" alt="" width={38} height={38} />
+      <span>Bluenet</span>
+    </A>
+  );
+
   return (
-    <div className={isPortal || isAdmin ? "application" : "website"}>
-      <header className="header">
-        <A to="/" className="brand">
-          <Waves size={40} strokeWidth={1.6} />
-          <span>Fisheries Connect</span>
-        </A>
-        <nav className="desktop-nav">{nav}</nav>
-        <div className="header-actions">
-          <select
-            className="language"
-            aria-label="Language"
-            value={lang}
-            onChange={(e) => setLang(e.target.value)}
-          >
-            <option value="en">English</option>
-            <option value="ta">தமிழ்</option>
-            <option value="si">සිංහල</option>
-          </select>
-          <span className="header-divider" />
-          {me ? (
-            <A className="account-link" to="/account">
-              {t("My account")}
-            </A>
+    <Navigate.Provider value={go}>
+      <div className={inWorkspace ? "application workspace-shell" : path === "/" ? "website landing-shell" : "website"}>
+        <a className="skip-link" href="#main-content">Skip to content</a>
+        <header className="header">
+          {brand}
+          {inWorkspace ? (
+            <span className="workspace-header-label">{isAdmin ? "Super admin" : t("Fisherman portal")}</span>
           ) : (
-            <A className="account-link" to="/login">
-              {t("Sign in")}
-            </A>
+            <nav className="desktop-nav" aria-label="Main navigation">{nav}</nav>
           )}
-          <A to="/cart" className="bag-link">
-            <ShoppingBag size={24} strokeWidth={1.5} />
-            {cart.length > 0 && <span>{cart.length}</span>}
-            <span className="sr-only">{t("Your basket")}</span>
-          </A>
-          <button
-            className="icon-button mobile-menu"
-            aria-label="Navigation menu"
-            aria-expanded={menu}
-            onClick={() => setMenu(!menu)}
-          >
-            {menu ? <X size={22} /> : <Menu size={22} />}
-          </button>
-        </div>
-      </header>
-      {menu && (
-        <nav className="mobile-drawer">
-          {nav}
-          <A to="/orders">{t("Your orders")}</A>
-          <A to="/portal">{t("Fisherman portal")}</A>
-          <A to="/prices">{t("Market prices")}</A>
-          <A to="/stations">{t("Fishing stations")}</A>
-          <A to="/sos">{t("Emergency assistance")}</A>
-          {me?.isAdmin && <A to="/admin">Admin</A>}
-        </nav>
-      )}
-      {!online && (
-        <div className="offline-banner" role="status">
-          You’re offline. Reconnect for current stock, forecasts and order
-          updates.
-        </div>
-      )}
-      {error && (
-        <div className="notice error-banner">
-          <span>{error}</span>
-          <button
-            className="text-link"
-            onClick={() => read().catch((e) => setError(e.message))}
-          >
-            Retry
-          </button>
-        </div>
-      )}
-      {(isPortal && me) || (isAdmin && me?.isAdmin) ? (
-        <div className="app-layout">
-          <aside className="sidebar">
-            <p className="eyebrow">
-              {isAdmin ? "PLATFORM OPERATIONS" : t("Fisherman portal")}
-            </p>
-            <nav>
-              {isAdmin
-                ? [
-                    "Overview",
-                    "Users & verification",
-                    "Products",
-                    "Orders",
-                    "Market prices",
-                    "Official alerts",
-                    "Fishing stations",
-                    "Services",
-                    "Articles",
-                    "FAQs",
-                    "Complaints",
-                  ].map((label) => (
-                    <button
-                      key={label}
-                      className={tab === label ? "active" : ""}
-                      onClick={() => setTab(label)}
-                    >
-                      {label === "Overview" ? (
-                        <LayoutDashboard size={18} />
-                      ) : label === "Users & verification" ? (
-                        <Users size={18} />
-                      ) : (
-                        <FileText size={18} />
-                      )}
-                      <span>{label}</span>
-                    </button>
-                  ))
-                : portalLinks.map(([url, label, Icon]) => (
-                    <A
-                      key={url}
-                      to={url}
-                      className={path === url ? "active" : ""}
-                    >
-                      <Icon size={18} />
-                      <span>{t(label)}</span>
-                    </A>
+          <div className="header-actions">
+            {language}
+            <span className="header-divider" />
+            {me ? (
+              <A className="account-link" to="/account">
+                {t("My account")}
+              </A>
+            ) : (
+              <A className="account-link" to="/login">
+                {t("Sign in")}
+              </A>
+            )}
+            <A to="/cart" className="bag-link">
+              <ShoppingBag size={24} strokeWidth={1.5} />
+              {cart.length > 0 && <span>{cart.length}</span>}
+              <span className="sr-only">{t("Your basket")}</span>
+            </A>
+            <button
+              className="icon-button mobile-menu"
+              aria-label="Navigation menu"
+              aria-expanded={menu}
+              onClick={() => setMenu(!menu)}
+            >
+              {menu ? <X size={22} /> : <Menu size={22} />}
+            </button>
+          </div>
+        </header>
+        {menu && (
+          <nav className="mobile-drawer" aria-label="Mobile navigation">
+            {nav}
+            <A to={me ? "/account" : "/login"}>{me ? t("My account") : t("Sign in")}</A>
+            <A to="/orders">{t("Your orders")}</A>
+            <A to="/prices">{t("Market prices")}</A>
+            <A to="/stations">{t("Fishing stations")}</A>
+            <A to="/sos">{t("Emergency assistance")}</A>
+            {me?.isAdmin && <A to="/admin">Admin</A>}
+            {me && <button className="text-link" onClick={signout}>{t("Sign out")}</button>}
+            {language}
+          </nav>
+        )}
+        {!online && (
+          <div className="offline-banner" role="status">
+            You’re offline. Reconnect for current stock, forecasts and order
+            updates.
+          </div>
+        )}
+        {error && (
+          <div className="notice error-banner">
+            <span>{error}</span>
+            <button
+              className="text-link"
+              onClick={() => read().catch((e) => setError(e.message))}
+            >
+              Retry
+            </button>
+          </div>
+        )}
+        {inWorkspace ? (
+          <div className="app-layout">
+            <div className="workspace-mobile-nav">
+              <label htmlFor="workspace-section">{isAdmin ? "Admin section" : "Portal section"}</label>
+              {isAdmin ? (
+                <select id="workspace-section" value={tab} onChange={(e) => setTab(e.target.value)}>
+                  {navigationGroups.map(({ name, items }) => (
+                    <optgroup key={name} label={name}>
+                      {items.map(([label]) => <option key={label}>{label}</option>)}
+                    </optgroup>
                   ))}
-            </nav>
-            <div className="sidebar-bottom">
-              <button className="text-link" onClick={signout}>
-                <User size={18} />
-                Sign out
-              </button>
-              <A to="/market">
-                <Store size={18} />
-                {t("Shop seafood")}
-              </A>
-              <A className="red" to="/sos">
-                <LifeBuoy size={18} />
-                {t("Emergency assistance")}
-              </A>
-              {me?.isAdmin && (
-                <A to={isAdmin ? "/portal" : "/admin"}>
-                  <ShieldCheck size={18} />
-                  {isAdmin ? t("Fisherman portal") : "Admin"}
-                </A>
+                </select>
+              ) : (
+                <select id="workspace-section" value={path} onChange={(e) => go(e.target.value)}>
+                  {portalGroups.map(({ name, items }) => (
+                    <optgroup key={name} label={name}>
+                      {items.map(([url, label]) => <option key={url} value={url}>{t(label)}</option>)}
+                    </optgroup>
+                  ))}
+                </select>
               )}
             </div>
-          </aside>
-          <main className="app-main">
-            {loading ? (
+            <aside className="sidebar">
+              <nav aria-label={isAdmin ? "Admin sections" : "Portal sections"}>
+                {isAdmin
+                  ? navigationGroups.map(({ name, items }) => (
+                      <div className="sidebar-group" key={name}>
+                        <p>{name}</p>
+                        {items.map(([label, Icon]) => (
+                          <button
+                            key={label}
+                            className={tab === label ? "active" : ""}
+                            aria-current={tab === label ? "page" : undefined}
+                            onClick={() => setTab(label)}
+                          >
+                            <Icon size={17} /><span>{label}</span>
+                          </button>
+                        ))}
+                      </div>
+                    ))
+                  : portalGroups.map(({ name, items }) => (
+                      <div className="sidebar-group" key={name}>
+                        <p>{name}</p>
+                        {items.map(([url, label, Icon]) => (
+                          <A key={url} to={url} className={path === url ? "active" : ""} current={path === url}>
+                            <Icon size={17} /><span>{t(label)}</span>
+                          </A>
+                        ))}
+                      </div>
+                    ))}
+              </nav>
+              <div className="sidebar-bottom">
+                <button className="text-link" onClick={signout}>
+                  <LogOut size={18} />
+                  Sign out
+                </button>
+                <A to="/market">
+                  <Store size={18} />
+                  {t("Shop seafood")}
+                </A>
+                <A className="red" to="/sos">
+                  <LifeBuoy size={18} />
+                  {t("Emergency assistance")}
+                </A>
+                {me?.isAdmin && (
+                  <A to={isAdmin ? "/portal" : "/admin"}>
+                    <ShieldCheck size={18} />
+                    {isAdmin ? t("Fisherman portal") : "Admin"}
+                  </A>
+                )}
+              </div>
+            </aside>
+            <main id="main-content" className="app-main">
+              {loading || openedWorkspace?.key !== workspaceKey ? (
+                <div className="loading" role="status">
+                  <Loader2 className="spin" />
+                  Loading your workspace…
+                </div>
+              ) : openedWorkspace.error ? (
+                <Empty title="Unable to load your workspace" text={openedWorkspace.error}>
+                  <button className="button" onClick={() => void openWorkspace()}>Retry</button>
+                </Empty>
+              ) : (
+                content()
+              )}
+            </main>
+          </div>
+        ) : (
+          <main id="main-content" className={path === "/" ? "home-main" : "page-main"}>
+            {loading && path !== "/" ? (
               <div className="loading">
                 <Loader2 className="spin" />
-                Loading your workspace…
+                Loading…
               </div>
             ) : (
               content()
             )}
           </main>
-        </div>
-      ) : (
-        <main className={path === "/" ? "home-main" : "page-main"}>
-          {loading && path !== "/" ? (
-            <div className="loading">
-              <Loader2 className="spin" />
-              Loading…
-            </div>
-          ) : (
-            content()
-          )}
-        </main>
-      )}
-      {!isPortal && !isAdmin && (
-        <footer>
-          <div className="footer-main">
-            <div>
-              <A className="brand" to="/">
-                <Waves size={30} />
-                <span>Fisheries Connect</span>
-              </A>
-              <p>
-                A closer connection to our coast.
-                <br />
-                Built for Sri Lankan fishing communities.
-              </p>
-            </div>
-            <div>
-              <h4>Explore</h4>
-              <A to="/market">{t("Seafood market")}</A>
-              <A to="/sellers">{t("Nearby sellers")}</A>
-              <A to="/prices">{t("Market prices")}</A>
-              <A to="/weather">{t("Marine weather")}</A>
-            </div>
-            <div>
-              <h4>For fishermen</h4>
-              <A to="/portal">{t("Fisherman portal")}</A>
-              <A to="/stations">{t("Fishing stations")}</A>
-              <A to="/services">{t("Equipment & services")}</A>
-              <A to="/sos">{t("Emergency assistance")}</A>
-            </div>
-            <div>
-              <h4>Fisheries Connect</h4>
-              <A to="/about">About our community</A>
-              <A to="/faq">FAQs</A>
-              <A to="/admin">Admin login</A>
-              <A to="/orders">{t("Your orders")}</A>
-              <button
-                className="text-link muted"
-                onClick={() => setModal({ type: "complaint", id: "" })}
-              >
-                Help & support
-              </button>
-              {me?.isAdmin && <A to="/admin">Admin dashboard</A>}
-              {me && (
-                <button className="text-link" onClick={signout}>
-                  {t("Sign out")}
+        )}
+        {!isPortal && !isAdmin && (
+          <footer>
+            <div className="footer-main">
+              <div>
+                {brand}
+                <p>
+                  A closer connection to our coast.
+                  <br />
+                  Built for Sri Lankan fishing communities.
+                </p>
+              </div>
+              <div>
+                <h4>Explore</h4>
+                <A to="/market">{t("Seafood market")}</A>
+                <A to="/sellers">{t("Nearby sellers")}</A>
+                <A to="/prices">{t("Market prices")}</A>
+                <A to="/weather">{t("Marine weather")}</A>
+              </div>
+              <div>
+                <h4>For fishermen</h4>
+                <A to="/portal">{t("Fisherman portal")}</A>
+                <A to="/stations">{t("Fishing stations")}</A>
+                <A to="/services">{t("Equipment & services")}</A>
+                <A to="/sos">{t("Emergency assistance")}</A>
+              </div>
+              <div>
+                <h4>Bluenet</h4>
+                <A to="/about">About our community</A>
+                <A to="/faq">FAQs</A>
+                <A to="/admin">Admin login</A>
+                <A to="/orders">{t("Your orders")}</A>
+                <button
+                  className="text-link muted"
+                  onClick={() => setModal({ type: "complaint", id: "" })}
+                >
+                  Help & support
                 </button>
-              )}
+                {me?.isAdmin && <A to="/admin">Admin dashboard</A>}
+                {me && (
+                  <button className="text-link" onClick={signout}>
+                    {t("Sign out")}
+                  </button>
+                )}
+              </div>
             </div>
-          </div>
-          <div className="footer-bottom">
-            <span>
-              © {new Date().getFullYear()} Fisheries Connect · Sri Lanka
-            </span>
-            <div>
-              <A to="/privacy">Privacy</A>
-              <A to="/terms">Terms</A>
+            <div className="footer-bottom">
+              <span>
+                © {new Date().getFullYear()} Bluenet · Sri Lanka
+              </span>
+              <div>
+                <A to="/privacy">Privacy</A>
+                <A to="/terms">Terms</A>
+              </div>
             </div>
+          </footer>
+        )}
+        {!isPortal && !isAdmin && (
+          <nav className="mobile-bottom">
+            {[
+              ["/", "Home", Waves],
+              ["/market", "Shop seafood", Store],
+              ["/orders", "Orders", Package],
+              ["/account", "My account", User],
+            ].map(([url, label, Icon]: any) => (
+              <A key={url} className={path === url ? "active" : ""} current={path === url} to={url}>
+                <Icon size={21} />
+                <span>{t(label)}</span>
+              </A>
+            ))}
+          </nav>
+        )}
+        {toast && (
+          <div className="toast" role="status">
+            <span>{toast}</span>
+            <button aria-label="Dismiss message" onClick={() => setToast("")}>
+              <X size={17} />
+            </button>
           </div>
-        </footer>
-      )}
-      {!isPortal && !isAdmin && (
-        <nav className="mobile-bottom">
-          {[
-            ["/", "Home", Waves],
-            ["/market", "Shop seafood", Store],
-            ["/orders", "Orders", Package],
-            ["/account", "My account", User],
-          ].map(([url, label, Icon]: any) => (
-            <A key={url} className={path === url ? "active" : ""} to={url}>
-              <Icon size={21} />
-              <span>{t(label)}</span>
-            </A>
-          ))}
-        </nav>
-      )}
-      {toast && (
-        <div className="toast" role="status">
-          <span>{toast}</span>
-          <button aria-label="Dismiss message" onClick={() => setToast("")}>
-            <X size={17} />
-          </button>
-        </div>
-      )}
-      {modal && (
-        <div
-          className="modal-backdrop"
-          onMouseDown={(e) => {
-            if (e.target === e.currentTarget) setModal(null);
-          }}
-        >
-          <section
-            className="modal"
-            role="dialog"
-            aria-modal="true"
-            aria-label="Fisheries Connect dialog"
-            onKeyDown={(e) => {
-              if (e.key === "Tab") {
-                const nodes = e.currentTarget.querySelectorAll<HTMLElement>(
-                    "button:not([disabled]),input:not([disabled]),select,textarea,a[href]",
-                  ),
-                  first = nodes[0],
-                  last = nodes[nodes.length - 1];
-                if (e.shiftKey && document.activeElement === first) {
-                  e.preventDefault();
-                  last?.focus();
-                } else if (!e.shiftKey && document.activeElement === last) {
-                  e.preventDefault();
-                  first?.focus();
-                }
-              }
+        )}
+        {modal && (
+          <div
+            className="modal-backdrop"
+            onMouseDown={(e) => {
+              if (e.target === e.currentTarget) setModal(null);
             }}
           >
-            <button
-              className="icon-button modal-close"
-              aria-label="Close dialog"
-              onClick={() => setModal(null)}
+            <section
+              className="modal"
+              role="dialog"
+              aria-modal="true"
+              aria-label="Bluenet dialog"
+              onKeyDown={(e) => {
+                if (e.key === "Tab") {
+                  const nodes = e.currentTarget.querySelectorAll<HTMLElement>(
+                      "button:not([disabled]),input:not([disabled]),select,textarea,a[href]",
+                    ),
+                    first = nodes[0],
+                    last = nodes[nodes.length - 1];
+                  if (e.shiftKey && document.activeElement === first) {
+                    e.preventDefault();
+                    last?.focus();
+                  } else if (!e.shiftKey && document.activeElement === last) {
+                    e.preventDefault();
+                    first?.focus();
+                  }
+                }
+              }}
             >
-              <X size={21} />
-            </button>
-            {dialogs()}
-          </section>
-        </div>
-      )}
-    </div>
+              <button
+                className="icon-button modal-close"
+                aria-label="Close dialog"
+                onClick={() => setModal(null)}
+              >
+                <X size={21} />
+              </button>
+              {dialogs()}
+            </section>
+          </div>
+        )}
+      </div>
+    </Navigate.Provider>
   );
 }

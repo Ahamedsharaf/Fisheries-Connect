@@ -1,6 +1,6 @@
-# Fisheries Connect · Coastal edition 2.0
+# Bluenet · Coastal edition 2.0
 
-The Cloudflare edition of Fisheries Connect, with an Explore gateway, a fishermen portal, a separate super admin login, dated CBSL fish-price comparisons, two coastal articles and an editable FAQ section. Authentication uses an application email/username and password. There is no Google sign-in or OAuth configuration.
+The Cloudflare edition of Bluenet, with an Explore gateway, a fishermen portal, a separate super admin login, dated CBSL fish-price comparisons, two coastal articles and an editable FAQ section. Authentication uses an application email/username and password. There is no Google sign-in or OAuth configuration.
 
 ## Update your existing Cloudflare deployment
 

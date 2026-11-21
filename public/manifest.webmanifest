@@ -1,1 +1,14 @@
-{"name":"Fisheries Connect","short_name":"Fisheries","description":"Fresh seafood. A closer connection.","start_url":"/","scope":"/","display":"standalone","background_color":"#ffffff","theme_color":"#0b1f3a","icons":[{"src":"/icon.png","sizes":"1254x1254","type":"image/png","purpose":"any"}]}
+{
+  "name": "Bluenet",
+  "short_name": "Bluenet",
+  "description": "Sri Lanka’s seafood community.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f4f8ff",
+  "theme_color": "#0a3d9d",
+  "icons": [
+    { "src": "/bluenet-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/bluenet-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}

@@ -2,7 +2,6 @@ import { useState, FormEvent } from "react";
 import {
   ArrowRight,
   ArrowLeft,
-  Anchor,
   Eye,
   EyeOff,
   LockKeyhole,
@@ -70,25 +69,21 @@ export default function AuthForm({
     <section className={"auth-stage " + (admin ? "admin-auth" : "")}>
       <div className="auth-story">
         <span className="auth-symbol">
-          {admin ? <ShieldCheck size={30} /> : <Anchor size={30} />}
+          {admin ? <ShieldCheck size={29} /> : <img src="/bluenet.svg" alt="" width={42} height={42} />}
         </span>
         <p className="eyebrow">
           {admin
-            ? "FISHERIES CONNECT · ADMINISTRATION"
+            ? "BLUENET · ADMINISTRATION"
             : "YOUR WORK. YOUR COAST."}
         </p>
         <h1>
           {admin ? (
             <>
-              A clear view.
-              <br />
-              Complete control.
+              Manage Bluenet.
             </>
           ) : (
             <>
-              A better day
-              <br />
-              starts here.
+              Your catch.<br />Your community.
             </>
           )}
         </h1>
@@ -99,7 +94,7 @@ export default function AuthForm({
         </p>
         <div className="auth-story-foot">
           <span className="status-dot" />
-          Fisheries Connect · Sri Lanka
+          Bluenet · Sri Lanka
         </div>
       </div>
       <div className="auth-card">
@@ -130,7 +125,7 @@ export default function AuthForm({
             {admin
               ? "Enter your admin email and application password."
               : reset
-                ? "Choose a new password for your Fisheries Connect account."
+                ? "Choose a new password for your Bluenet account."
                 : register
                   ? "A few details, and you’re ready to get started."
                   : "Use your email or username to continue."}
@@ -310,7 +305,7 @@ export default function AuthForm({
           )}
           <p className="auth-note small">
             <LockKeyhole size={13} />
-            Use a separate Fisheries Connect password.
+            Use a separate Bluenet password.
           </p>
         </form>
       </div>
